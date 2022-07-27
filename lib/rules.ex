@@ -29,7 +29,7 @@ defmodule IslandsEngine.Rules do
     :gen_statem.call(fsm, {:move_island, player})
   end
 
-  @doc""""
+  @doc"""
   Handles island setting when the game is in the :players_set state
   """
   def set_islands(fsm, player) when is_atom player do
@@ -86,9 +86,9 @@ defmodule IslandsEngine.Rules do
     {:keep_state_and_data, {:reply, from, :initialized}}
   end
 
-  @doc"""
-  Match any other undefined event
-  """
+
+  # Match any other undefined event
+
   def initialized({:call, from}, _, _state_data) do
     {:keep_state_and_data, {:reply, from, :error}}
   end
@@ -110,67 +110,57 @@ defmodule IslandsEngine.Rules do
     end
   end
 
-  @doc"""
-  Update the struct %Rules{} with a key that matches the player atom and set its value to :island_set
-  Sends a reply to the caller process
-  """
+
+  # Update the struct %Rules{} with a key that matches the player atom and set its value to :island_set
+  # Sends a reply to the caller process
   def players_set({:call, from}, {:set_islands, player}, state_data) do
     state_data = Map.put(state_data, player, :islands_set)
     set_islands_reply(from, state_data, state_data.player1, state_data.player2)
   end
 
-  @doc"""
-  Shows the current state_data if the state machine is inthe players_set state
-  """
+
+  # Shows the current state_data if the state machine is inthe players_set state
   def players_set({:call, from}, :show_current_state, _state_data) do
     {:keep_state_and_data, {:reply, from, :players_set}}
   end
 
-  @doc""""
-  Catch errors
-  """
+
+  # Catch errors
   def players_set({:call, from}, _, state_data) do
     {:keep_state_and_data, {:reply, from, :error}}
   end
 
-  @doc""""
-  If the reply is :ok it is player2's turn to guess coordinates
-  """
+
+  # If the reply is :ok it is player2's turn to guess coordinates
   def player1_turn({:call, from}, {:guess_coordinate, :player1}, state_data) do
     {:next_state, :player2_turn, state_data, {:reply, from, :ok}}
   end
 
-  @doc""""
-  Ends the game if player1 has guessed all the coordinates in player2's board
-  """
+
+  # Ends the game if player1 has guessed all the coordinates in player2's board
   def player1_turn({:call, from}, :win, state_data) do
     {:next_state, :game_over, state_data, {:reply, from, :ok}}
   end
 
-  @doc""""
-  Gets the current state_data in the player1_turn state
-  """
+
+  #Gets the current state_data in the player1_turn state
   def player1_turn({:call, from}, :show_current_state, _state_data) do
     {:keep_state_and_data, {:reply, from, :player1_turn}}
   end
 
-  @doc""""
-  Catches all pattern mismatches
-  """
+
+  #Catches all pattern mismatches
   def player1_turn({:call, from}, _, _state_data) do
     {:keep_state_and_data, {:reply, from, :error}}
   end
 
-  @doc""""
-  Changes the state to player1_turn if the reply is :ok
-  """
+
+  #Changes the state to player1_turn if the reply is :ok
   def player2_turn({:call, from}, {:guess_coordinate, :player2}, state_data) do
     {:next_state, :player1_turn, state_data, {:reply, from, :ok}}
   end
 
-  @doc""""
-  Ends the game if player2 has guessed all of player1's coordinates
-  """
+  #Ends the game if player2 has guessed all of player1's coordinates
   def player2_turn({:call, from}, :win, state_data) do
     {:next_state, :game_over, state_data, {:reply, from, :ok}}
   end
@@ -183,32 +173,32 @@ defmodule IslandsEngine.Rules do
     {:keep_state_and_data, {:reply, from, :player2_turn}}
   end
 
-  
+
   def game_over({:call, from}, :show_current_state, _state_data) do
     {:keep_state_and_data, {:reply, from, :game_over}}
   end
 
-  @doc""""
+  @doc"""
   Returns an error if the player tries to do anything if the game has already ended
   """
   def game_over({:call, from}, _, _state_data) do
     {:keep_state_and_data, {:reply, from, :error}}
   end
 
-  @doc""""
-  Matches if :player1 had already set theirs and the player2 has just finished setting
-  Therefore inthe %Rule{} struct, :player1 and :player2 must be :islands_set
-  If so change the state to :player1_turn which enables :player1 to start guessing
-  """
+
+  # Matches if :player1 had already set theirs and the player2 has just finished setting
+  # Therefore inthe %Rule{} struct, :player1 and :player2 must be :islands_set
+  # If so change the state to :player1_turn which enables :player1 to start guessing
+
   defp set_islands_reply(from, state_data, status, status)
        when status == :islands_set do
     {:next_state, :player1_turn, state_data, {:reply, from, :ok}}
   end
 
-  @doc"""
-  Matches if one of the players(probably :player1) has just finished setting their island
-  and the other one has not set
-  """
+
+  # Matches if one of the players(probably :player1) has just finished setting their island
+  # and the other one has not set
+
   defp set_islands_reply(from, state_data, _, _) do
     {:keep_state, state_data, {:reply, from, :ok}}
   end
