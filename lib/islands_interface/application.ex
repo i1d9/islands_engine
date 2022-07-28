@@ -13,9 +13,10 @@ defmodule IslandsInterface.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: IslandsInterface.PubSub},
       # Start the Endpoint (http/https)
-      IslandsInterfaceWeb.Endpoint
+      IslandsInterfaceWeb.Endpoint,
       # Start a worker by calling: IslandsInterface.Worker.start_link(arg)
       # {IslandsInterface.Worker, arg}
+      IslandsInterface.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

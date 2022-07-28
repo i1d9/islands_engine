@@ -68,4 +68,65 @@ channel.push("hello", { message: "greeting" }).receive("ok", (response) => {
 }).receive("error", (response) => {
   console.log("Unable to say hello to the channel")
 });
+
+channel.on("said_hello", response => {
+  console.log("Returned Greeting:", response.message)
+});
+
+function new_channel(player, screen_name) {
+  return socket.channel("game:" + player, { screen_name: screen_name });
+}
+
+function join(channel) {
+  channel.join().receive("ok", response => {
+    console.log("Joined successfully!", response)
+  })
+    .receive("error", response => {
+      console.log("Unable to join", response)
+    })
+}
+
+function new_game(channel) {
+  channel.push("new_game")
+    .receive("ok", response => {
+      console.log("New Game!", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to start a new game.", response)
+    })
+}
+
+function add_player(channel, player) {
+  channel.push("add_player", player)
+    .receive("error", response => {
+      console.log("Unable to add new player: " + player, response)
+    })
+}
+
+function set_island_coordinates(channel, player, island, coordinates) {
+  params = { "player": player, "island": island, "coordinates": coordinates }
+  channel.push("set_island_coordinates", params)
+    .receive("ok", response => {
+      console.log("New coordinates set!", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to set new coordinates.", response)
+    })
+}
+
+function set_islands(channel, player) {
+  channel.push("set_islands", player)
+    .receive("error", response => {
+      console.log("Unable to set islands for: " + player, response)
+    })
+}
+
+function guess_coordinate(channel, player, coordinate) {
+  params = { "player": player, "coordinate": coordinate }
+  channel.push("guess_coordinate", params)
+    .receive("error", response => {
+      console.log("Unable to guess a coordinate: " + player, response)
+    })
+}
+
 export default socket
